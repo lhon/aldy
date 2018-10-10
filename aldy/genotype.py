@@ -27,7 +27,7 @@ from .version import __version__
 
 
 @timing
-def genotype(sample, output, log_output, gene, profile, threshold, solver, cn_solution):
+def genotype(sample, output, log_output, gene, profile, threshold, solver, cn_solution, args=None):
 	try:
 		with open(sample): # Check does file exist
 			pass
@@ -57,7 +57,7 @@ def genotype(sample, output, log_output, gene, profile, threshold, solver, cn_so
 		gene.alleles = filtering.initial_filter(gene, sample)
 		cn_sol = cn.estimate_cn(gene, sample, profile, cn_solution, solver)
 		score, init_sol = protein.get_initial_solution(gene, sample, cn_sol, solver)
-		score, sol = refiner.get_refined_solution(gene, sample, init_sol, solver)
+		score, sol = refiner.get_refined_solution(gene, sample, init_sol, solver, args=args)
 
 		sol = diplotype.assign_diplotype(gene, sol, output)
 

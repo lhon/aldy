@@ -22,7 +22,7 @@ from .gene import Mutation
 from .filtering import cnv_filter
 
 
-def get_refined_solution(gene, sam, initial_solutions, solver):
+def get_refined_solution(gene, sam, initial_solutions, solver, args=None):
 	mutations = set()
 	for sol in initial_solutions: # tuple (solution, cn_config)
 		for an in sol[0]:
@@ -39,7 +39,7 @@ def get_refined_solution(gene, sam, initial_solutions, solver):
 
 	# pool = multiprocessing.Pool(4)
 	results = list(map(
-		functools.partial(refine_ilp, gene=gene, sam=sam, mutations=mutations, solver=solver),
+		functools.partial(refine_ilp, gene=gene, sam=sam, mutations=mutations, solver=solver, args=args),
 		initial_solutions
 	))
 	if len(results) > 0:
@@ -50,7 +50,7 @@ def get_refined_solution(gene, sam, initial_solutions, solver):
 	return score, solutions
 
 
-def refine_ilp(solution, gene, sam, mutations, solver):
+def refine_ilp(solution, gene, sam, mutations, solver, args=None):
 	log.debug('== Refiner ==')
 
 	solution, region_cn = solution
@@ -169,8 +169,9 @@ def refine_ilp(solution, gene, sam, mutations, solver):
 		expr = c.quicksum([MM[a][m] for a in alleles if m in alleles[a]])
 		log.trace('M  Contraint for {}: 0 >= {}', m, expr)
 		c.addConstr(expr <= 0)
+
 	# - make sure that variation is not over-expressed
-	for m in mutations:
+	for m in mutations if args is None or not args.ignore_overexpressed_constraint else []:
 		region = gene.region_at[m.pos]
 		full_cn = region_cn[region]
 		mut_cn = sam.percentage(m)

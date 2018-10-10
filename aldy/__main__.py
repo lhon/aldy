@@ -63,6 +63,9 @@ def get_args():
 	parser.add_argument('--profile-factor', dest='profile_factor', default=2.0, 
 		help='DO NOT USE / ONLY FOR DEVELOPMENT USE')
 
+	parser.add_argument('--ignore_overexpressed_constraint', action='store_true',
+		help='Color modification to adjust constraints')
+
 	return parser.parse_args()
 
 
@@ -136,7 +139,8 @@ def main(args=None):
 		args.gene, args.profile,
 		float(args.threshold) / 100.0,
 		args.solver,
-		args.cn
+		args.cn,
+		args,
 	)
 	log.warn('Result{}: ', '' if len(result) == 1 else 's')
 	for rd, r in result:
